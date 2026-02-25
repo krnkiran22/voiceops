@@ -16,6 +16,12 @@ export const createUpdate = asyncHandler(async (req: Request, res: Response) => 
         throw new Error('User not found for this Telegram ID');
     }
 
+    // Check if tracking is active (within 10 hours of last /start)
+    if (!user.trackedUntil || new Date() > user.trackedUntil) {
+        res.status(403);
+        throw new Error('Tracking session expired. Send /start to start a new 10-hour tracking session.');
+    }
+
     const update = await Update.create({
         userId: user._id,
         telegramMessageId,

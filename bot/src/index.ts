@@ -3,6 +3,7 @@ import { config } from './config';
 import { handleStart, handleLink, handleHelp } from './handlers/commandHandler';
 import { handleVoice } from './handlers/voiceHandler';
 import { handleVideo } from './handlers/videoHandler';
+import { handleTextMention } from './handlers/textHandler';
 
 if (!config.TELEGRAM_BOT_TOKEN) {
     console.error('TELEGRAM_BOT_TOKEN is missing!');
@@ -20,6 +21,9 @@ bot.command('help', handleHelp);
 bot.on('message:voice', handleVoice);
 bot.on('message:video', handleVideo);
 bot.on('message:video_note', handleVideo); // Circular video messages
+
+// Handle @mentions or non-media messages
+bot.on('message:text', handleTextMention);
 
 // Error Handling
 bot.catch((err) => {

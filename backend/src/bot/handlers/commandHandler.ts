@@ -3,9 +3,24 @@ import apiClient from '../apiClient';
 import { config } from '../config';
 
 export const handleStart = async (ctx: Context) => {
-    await ctx.reply(
-        "👋 Welcome to VoiceOps!\n\nSend voice or video messages in your group and I'll transcribe them.\n\nTo link your account, go to the web app → Profile → Link Telegram Account, then use /link <code> here."
-    );
+    try {
+        await apiClient.post('/api/users/start-tracking', {
+            telegramUserId: String(ctx.from?.id),
+        });
+
+        await ctx.reply(
+            "👋 Welcome back to VoiceOps! Tracking is now ON for the next 10 hours.\n\nSend voice, video, or mention me in a text message and I'll record your update."
+        );
+    } catch (error: any) {
+        if (error.response?.status === 404) {
+            await ctx.reply(
+                "👋 Welcome to VoiceOps!\n\n⚠️ Your Telegram is not linked yet. Please link it using /link <code> to start tracking.\n\nLink your account in the web app → Profile → Link Telegram Account."
+            );
+        } else {
+            console.error('Error starting tracking:', error);
+            await ctx.reply("👋 Welcome to VoiceOps! (Error starting tracking, please ensure you are linked)");
+        }
+    }
 };
 
 export const handleLink = async (ctx: Context) => {

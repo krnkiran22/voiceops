@@ -4,7 +4,7 @@ export interface IUpdate extends Document {
     userId: mongoose.Types.ObjectId;
     telegramMessageId: string;
     telegramChatId: string;
-    mediaType: 'voice' | 'video';
+    mediaType: 'voice' | 'video' | 'text';
     transcript: string;
     summary: string;
     topic: string;
@@ -19,7 +19,7 @@ const UpdateSchema = new Schema<IUpdate>({
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     telegramMessageId: { type: String, required: true },
     telegramChatId: { type: String, required: true },
-    mediaType: { type: String, enum: ['voice', 'video'], required: true },
+    mediaType: { type: String, enum: ['voice', 'video', 'text'], required: true },
     transcript: { type: String, required: true },
     summary: { type: String, required: true },
     topic: { type: String, default: 'update' },

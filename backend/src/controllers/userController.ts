@@ -61,3 +61,19 @@ export const linkTelegram = asyncHandler(async (req: Request, res: Response) => 
 
     res.json({ success: true, userName: user.name });
 });
+
+export const startTracking = asyncHandler(async (req: Request, res: Response) => {
+    const { telegramUserId } = req.body;
+    const user = await User.findOne({ telegramUserId });
+
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    // Set tracking to 10 hours from now
+    user.trackedUntil = new Date(Date.now() + 10 * 60 * 60 * 1000);
+    await user.save();
+
+    res.json({ success: true, trackedUntil: user.trackedUntil });
+});

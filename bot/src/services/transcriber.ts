@@ -1,17 +1,13 @@
 import fs from 'fs';
-import OpenAI from 'openai';
-import { config } from '../config';
-
-const openai = new OpenAI({
-    apiKey: config.OPENAI_API_KEY,
-    baseURL: process.env.AI_BASE_URL || 'https://api.openai.com/v1',
-});
+import { aiManager } from './aiManager';
 
 export async function transcribeAudio(filePath: string): Promise<string> {
-    const response = await openai.audio.transcriptions.create({
-        model: 'whisper-1',
-        file: fs.createReadStream(filePath),
-    });
+    return await aiManager.execute(async (client) => {
+        const response = await client.audio.transcriptions.create({
+            model: 'whisper-1',
+            file: fs.createReadStream(filePath),
+        });
 
-    return response.text;
+        return response.text;
+    });
 }

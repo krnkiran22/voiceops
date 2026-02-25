@@ -1,47 +1,45 @@
 import { Context } from 'grammy';
-import { transcribeAudio } from '../services/transcriber';
-import { summarize } from '../services/summarizer';
-import { downloadFile, deleteFile } from '../services/fileManager';
 import apiClient from '../apiClient';
 import { config } from '../config';
+import { summarize } from '../services/summarizer';
 
-export const handleVoice = async (ctx: Context) => {
-    if (!ctx.message?.voice) return;
+export const handleTextMention = async (ctx: Context) => {
+    const text = ctx.message?.text || ctx.message?.caption;
+    if (!text) return;
 
-    const fileId = ctx.message.voice.file_id;
-    const fileName = `${ctx.message.message_id}.ogg`;
+    const botUsername = ctx.me.username;
+    if (!text.toLowerCase().includes(`@${botUsername.toLowerCase()}`)) return;
 
     // Provide immediate feedback
-    const processingMsg = await ctx.reply("⏳ Processing your voice update...", {
+    const processingMsg = await ctx.reply("✍️ Recording your text update...", {
         reply_parameters: { message_id: ctx.message!.message_id }
     });
 
-    let filePath: string | null = null;
-
     try {
-        const file = await ctx.api.getFile(fileId);
-        const fileUrl = `https://api.telegram.org/file/bot${config.TELEGRAM_BOT_TOKEN}/${file.file_path}`;
+        // Remove the mention from the text to get the actual update
+        const cleanText = text.replace(`@${botUsername}`, '').trim();
 
-        // 1. Download
-        filePath = await downloadFile(fileUrl, fileName);
+        if (!cleanText) {
+            return await ctx.api.editMessageText(
+                ctx.chat!.id,
+                processingMsg.message_id,
+                "🤖 I'm here! Want to record a text update? Just include your update after my @mention."
+            );
+        }
 
-        // 2. Transcribe
-        const transcript = await transcribeAudio(filePath);
+        // 1. Summarize the text update
+        const { summary, topic } = await summarize(cleanText);
 
-        // 3. Summarize
-        const { summary, topic } = await summarize(transcript);
-
-        // 4. Save to Backend
+        // 2. Save to Backend
         try {
             const response = await apiClient.post('/api/updates', {
                 telegramUserId: String(ctx.from?.id),
-                telegramMessageId: String(ctx.message.message_id),
+                telegramMessageId: String(ctx.message?.message_id),
                 telegramChatId: String(ctx.chat?.id),
-                mediaType: 'voice',
-                transcript,
+                mediaType: 'text',
+                transcript: cleanText, // For text, transcript is the clean text
                 summary,
                 topic,
-                durationSeconds: ctx.message.voice.duration,
                 senderName: ctx.from?.first_name || 'Unknown',
                 senderTelegramUsername: ctx.from?.username,
             });
@@ -49,13 +47,12 @@ export const handleVoice = async (ctx: Context) => {
             const updateId = response.data._id;
             const username = ctx.from?.username ? `@${ctx.from.username}` : ctx.from?.first_name;
 
-            // 5. Success Reply
+            // 3. Success Reply
             await ctx.api.editMessageText(
                 ctx.chat!.id,
                 processingMsg.message_id,
-                `🎙️ *Update from ${username}*\n\n` +
+                `📝 *Text Update from ${username}*\n\n` +
                 `📋 *Summary:* ${summary}\n\n` +
-                `📝 *Transcript:*\n"${transcript}"\n\n` +
                 `🔗 [View Update](${config.FRONTEND_URL}/dashboard/updates/${updateId})`,
                 { parse_mode: 'Markdown' }
             );
@@ -77,7 +74,7 @@ export const handleVoice = async (ctx: Context) => {
                     `Send /start to start a new 10-hour tracking session.`
                 );
             } else {
-                console.error('Error saving update:', error);
+                console.error('Error saving text update:', error);
                 await ctx.api.editMessageText(
                     ctx.chat!.id,
                     processingMsg.message_id,
@@ -87,15 +84,11 @@ export const handleVoice = async (ctx: Context) => {
         }
 
     } catch (error) {
-        console.error('Voice processing error:', error);
+        console.error('Text processing error:', error);
         await ctx.api.editMessageText(
             ctx.chat!.id,
             processingMsg.message_id,
-            "❌ Failed to process voice note. Please check your AI API keys."
+            "❌ Failed to process text update."
         );
-    } finally {
-        if (filePath) {
-            deleteFile(filePath);
-        }
     }
 };
