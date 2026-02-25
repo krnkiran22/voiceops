@@ -1,9 +1,13 @@
 import OpenAI from 'openai';
 import { config } from '../config';
 
+// This client works for OpenAI, Groq, and Ollama
 const openai = new OpenAI({
-    apiKey: config.OPENAI_API_KEY,
+    apiKey: config.OPENAI_API_KEY,      // Put your Groq or OpenAI key here
+    baseURL: process.env.AI_BASE_URL || 'https://api.openai.com/v1', // Change to Groq or local Ollama URL
 });
+
+const AI_MODEL = process.env.AI_MODEL || 'gpt-4o-mini';
 
 const SYSTEM_PROMPT = `
 You are an operations assistant that summarizes spoken team updates.
@@ -33,12 +37,13 @@ Rules:
 export async function summarize(transcript: string): Promise<{ summary: string; topic: string }> {
     try {
         const response = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
+            model: AI_MODEL,
             messages: [
                 { role: 'system', content: SYSTEM_PROMPT },
                 { role: 'user', content: transcript }
             ],
             temperature: 0.3,
+            response_format: { type: 'json_object' } // Ensures valid JSON
         });
 
         const raw = response.choices[0].message.content ?? '{}';
