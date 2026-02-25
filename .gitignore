@@ -47,3 +47,5 @@ dist
 temp
 *.log
 .DS_Store
+backend/
+bot/
