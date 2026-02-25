@@ -6,6 +6,7 @@ import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import updateRoutes from './routes/updates';
 import adminRoutes from './routes/admin';
+import { startBot } from './bot/botEntry';
 
 dotenv.config();
 
@@ -38,4 +39,5 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+    startBot();
 });
