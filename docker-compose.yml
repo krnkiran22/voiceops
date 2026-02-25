@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: voiceops-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./backend
+    container_name: voiceops-backend
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mongodb
+    env_file:
+      - ./backend/.env
+
+  bot:
+    build: ./bot
+    container_name: voiceops-bot
+    depends_on:
+      - backend
+    env_file:
+      - ./bot/.env
+
+volumes:
+  mongo_data:
