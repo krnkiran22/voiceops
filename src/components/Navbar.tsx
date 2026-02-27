@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Mic, User, LogOut, Search, LayoutDashboard } from 'lucide-react';
+import { Mic, User, LogOut, Search, LayoutDashboard, ShieldCheck } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
@@ -20,7 +20,7 @@ const Navbar = () => {
     ];
 
     if (user.role === 'admin') {
-        navItems.push({ name: 'Admin', href: '/admin', icon: Mic });
+        navItems.push({ name: 'Admin', href: '/admin', icon: ShieldCheck });
     }
 
     return (
