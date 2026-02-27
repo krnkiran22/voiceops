@@ -3,15 +3,42 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Users, FileText, Activity, AlertCircle, TrendingUp, Clock, ShieldCheck, Search, RefreshCcw, UserCircle, Hash } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import { formatDistanceToNow, format } from 'date-fns';
 import { toast } from 'sonner';
+
+// --- INLINE SVG COMPONENTS ---
+
+const IconShield = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+);
+
+const IconUsers = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+);
+
+const IconFile = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>
+);
+
+const IconTrend = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>
+);
+
+const IconSearch = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+);
+
+const IconRefresh = ({ spinning }: { spinning?: boolean }) => (
+    <svg className={spinning ? 'animate-spin' : ''} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
+);
+
+const IconClock = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+);
 
 interface Stats {
     totalUsers: number;
@@ -49,10 +76,10 @@ export default function AdminDashboard() {
             ]);
             setStats(statsRes.data);
             setEfficiency(efficiencyRes.data);
-            if (isRefresh) toast.success('Dashboard data updated');
+            if (isRefresh) toast.success('INTEL SYNCED');
         } catch (error) {
             console.error('Failed to fetch admin data', error);
-            toast.error('Failed to update dashboard');
+            toast.error('SYNC FAILED');
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -74,193 +101,165 @@ export default function AdminDashboard() {
     );
 
     if (loading) return (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-            <RefreshCcw className="w-10 h-10 text-blue-600 animate-spin" />
-            <p className="text-slate-500 font-medium">Loading Intelligence Dashboard...</p>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+            <IconRefresh spinning />
+            <p className="text-black font-black tracking-widest uppercase text-xs">Initializing Secure Terminal...</p>
         </div>
     );
 
     if (!user || user.role !== 'admin') return null;
 
-    const getEfficiencyColor = (value: number) => {
-        if (value >= 85) return 'text-emerald-700 bg-emerald-50 border-emerald-100';
-        if (value >= 60) return 'text-amber-700 bg-amber-50 border-amber-100';
-        return 'text-rose-700 bg-rose-50 border-rose-100';
-    };
-
     return (
-        <div className="max-w-7xl mx-auto space-y-10 pb-20">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-slate-900 p-2 rounded-xl">
-                            <ShieldCheck className="w-6 h-6 text-emerald-400" />
+        <div className="max-w-screen-2xl mx-auto px-6 py-12 space-y-16 bg-white text-black min-h-screen">
+
+            {/* --- HEADER --- */}
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 border-b-4 border-black pb-10">
+                <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                        <div className="bg-black text-white p-3">
+                            <IconShield />
                         </div>
-                        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight italic uppercase">Command Center</h1>
+                        <h1 className="text-6xl font-black tracking-tighter uppercase leading-none">Command</h1>
                     </div>
-                    <p className="text-slate-500 font-medium pl-1">Global Operator Intelligence & Compliance Monitor</p>
+                    <p className="text-black/40 font-bold uppercase tracking-[0.2em] text-sm italic">Intelligence compliance & tactical overrides</p>
                 </div>
 
-                <div className="flex items-center gap-3 w-full md:w-auto">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => fetchData(true)}
-                        disabled={refreshing}
-                        className="bg-white hover:bg-slate-50 border-slate-200 text-slate-600 font-semibold gap-2 h-11 px-5 shadow-sm active:scale-95 transition-all"
-                    >
-                        <RefreshCcw className={`w-4 h-4 ${refreshing ? 'animate-spin text-blue-500' : ''}`} />
-                        {refreshing ? 'Syncing...' : 'Refresh Intel'}
-                    </Button>
-                    <div className="hidden lg:flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 h-11 rounded-xl border border-emerald-100">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-sm font-bold uppercase tracking-wider">Live Monitoring</span>
+                <div className="flex flex-wrap items-center gap-4">
+                    <div className="border-2 border-black flex items-center h-16 divide-x-2 divide-black overflow-hidden">
+                        <div className="px-6 flex items-center gap-3">
+                            <div className="w-2 h-2 rounded-full bg-black animate-pulse" />
+                            <span className="text-xs font-black uppercase tracking-widest">Live Feed</span>
+                        </div>
+                        <button
+                            onClick={() => fetchData(true)}
+                            disabled={refreshing}
+                            className="h-full px-8 hover:bg-black hover:text-white transition-colors flex items-center gap-3 active:invert"
+                        >
+                            <IconRefresh spinning={refreshing} />
+                            <span className="text-xs font-black uppercase tracking-widest leading-none">Sync</span>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {/* Impact Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* --- METRICS GRID --- */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 border-4 border-black divide-y-4 md:divide-y-0 md:divide-x-4 divide-black">
                 {[
-                    { label: 'Ops Personnel', val: stats?.totalUsers, icon: Users, color: 'blue', desc: 'Active operators' },
-                    { label: 'Intelligence Feed', val: stats?.totalUpdates, icon: FileText, color: 'purple', desc: 'Total data points' },
-                    { label: 'Today\'s Output', val: stats?.updatesToday, icon: TrendingUp, color: 'emerald', desc: 'Last 24 hours' },
-                    { label: 'Admin Faculty', val: stats?.totalAdmins, icon: Activity, color: 'amber', desc: 'System controllers' }
+                    { label: 'Personnel', val: stats?.totalUsers, icon: IconUsers, unit: 'Active' },
+                    { label: 'Intel Pts', val: stats?.totalUpdates, icon: IconFile, unit: 'Total' },
+                    { label: 'Output/24h', val: stats?.updatesToday, icon: IconTrend, unit: 'Volume' },
+                    { label: 'Faculty', val: stats?.totalAdmins, icon: IconShield, unit: 'Admins' }
                 ].map((stat, i) => (
-                    <Card key={i} className="border-none shadow-md bg-white hover:shadow-lg transition-shadow overflow-hidden group">
-                        <div className={`h-1 w-full bg-${stat.color}-500/20 group-hover:bg-${stat.color}-500 transition-colors`} />
-                        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 pt-6">
-                            <CardTitle className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-none">{stat.label}</CardTitle>
-                            <stat.icon className={`w-5 h-5 text-${stat.color}-500 opacity-80`} />
-                        </CardHeader>
-                        <CardContent className="pb-6">
-                            <div className="text-3xl font-black text-slate-900 leading-none">{stat.val ?? 0}</div>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase mt-2 tracking-tight">{stat.desc}</p>
-                        </CardContent>
-                    </Card>
+                    <div key={i} className="p-8 group hover:bg-black hover:text-white transition-colors">
+                        <div className="flex items-center justify-between mb-8">
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 group-hover:opacity-100">{stat.label}</span>
+                            <stat.icon />
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-5xl font-black tabular-nums leading-none tracking-tighter">{stat.val ?? 0}</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest opacity-30 group-hover:opacity-60">{stat.unit}</span>
+                        </div>
+                    </div>
                 ))}
             </div>
 
-            {/* Operator Control Panel */}
-            <Card className="border-none shadow-xl bg-white overflow-hidden rounded-3xl ring-1 ring-slate-100">
-                <CardHeader className="bg-slate-50/50 border-b border-slate-100 px-8 py-8 space-y-6">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                        <div className="space-y-1">
-                            <div className="flex items-center gap-3">
-                                <UserCircle className="w-6 h-6 text-blue-600" />
-                                <CardTitle className="text-2xl font-black text-slate-900">Operator Directory</CardTitle>
-                            </div>
-                            <CardDescription className="text-slate-500 font-medium">Compliance auditing for 15-min and 1-hour recurring intelligence tasks.</CardDescription>
-                        </div>
+            {/* --- DIRECTORY SECTION --- */}
+            <div className="space-y-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b-2 border-black pb-6">
+                    <h2 className="text-2xl font-black uppercase tracking-tight flex items-center gap-4">
+                        Operator Directory
+                    </h2>
 
-                        <div className="relative w-full lg:max-w-md group">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                            <Input
-                                placeholder="Search by name, email or telegram..."
-                                className="pl-12 h-14 bg-white border-slate-200 rounded-2xl shadow-inner-sm focus-visible:ring-blue-500/20 text-base font-medium placeholder:text-slate-400"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+                    <div className="relative w-full md:max-w-md group">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30 group-focus-within:opacity-100 transition-opacity">
+                            <IconSearch />
                         </div>
+                        <input
+                            placeholder="SEARCH OPERATOR ID..."
+                            className="w-full pl-12 pr-6 h-14 bg-transparent border-2 border-black font-black uppercase text-sm tracking-widest focus:bg-black focus:text-white placeholder:text-black/20 outline-none transition-all"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                        <Table>
-                            <TableHeader className="bg-slate-50/80 border-b border-slate-100">
-                                <TableRow className="hover:bg-transparent">
-                                    <TableHead className="py-5 px-8 text-slate-400 font-bold uppercase text-[11px] tracking-widest">Operator Entity</TableHead>
-                                    <TableHead className="py-5 text-slate-400 font-bold uppercase text-[11px] tracking-widest">Communications</TableHead>
-                                    <TableHead className="py-5 text-center text-slate-400 font-bold uppercase text-[11px] tracking-widest">15m Slot Efficiency</TableHead>
-                                    <TableHead className="py-5 text-center text-slate-400 font-bold uppercase text-[11px] tracking-widest">1h Slot Efficiency</TableHead>
-                                    <TableHead className="py-5 text-slate-400 font-bold uppercase text-[11px] tracking-widest">Signal Status</TableHead>
-                                    <TableHead className="py-5 px-8 text-right text-slate-400 font-bold uppercase text-[11px] tracking-widest">Executive Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredEfficiency.map((u) => (
-                                    <TableRow key={u.id} className="hover:bg-blue-50/30 transition-colors border-b border-slate-50/50 last:border-0 group">
-                                        <TableCell className="py-6 px-8">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center font-black text-slate-500 group-hover:bg-blue-600 group-hover:text-white transition-all transform group-hover:scale-110 group-hover:rotate-3 shadow-sm uppercase">
-                                                    {u.name.substring(0, 2)}
+                </div>
+
+                <div className="overflow-x-auto border-x-2 border-black">
+                    <table className="w-full border-collapse">
+                        <thead>
+                            <tr className="bg-black text-white">
+                                <th className="py-6 px-8 text-left text-[10px] font-black uppercase tracking-[0.2em]">Operator ID</th>
+                                <th className="py-6 px-4 text-center text-[10px] font-black uppercase tracking-[0.2em]">15M Efficiency</th>
+                                <th className="py-6 px-4 text-center text-[10px] font-black uppercase tracking-[0.2em]">1H Efficiency</th>
+                                <th className="py-6 px-4 text-center text-[10px] font-black uppercase tracking-[0.2em]">Last Signal</th>
+                                <th className="py-6 px-8 text-right text-[10px] font-black uppercase tracking-[0.2em]">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y-2 divide-black/5">
+                            {filteredEfficiency.map((u) => (
+                                <tr key={u.id} className="hover:bg-slate-50 transition-colors group">
+                                    <td className="py-8 px-8">
+                                        <div className="flex items-center gap-5">
+                                            <div className="w-14 h-14 bg-black text-white flex items-center justify-center font-black text-lg shadow-[4px_4px_0px_#ccc]">
+                                                {u.name.substring(0, 2).toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <div className="font-black text-lg tracking-tight leading-none mb-1">{u.name}</div>
+                                                <div className="text-[10px] font-black tracking-widest opacity-40 uppercase">@{u.telegramUsername || 'NULL_ID'}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="py-8 px-4 text-center">
+                                        <div className="inline-block border-2 border-black px-4 py-2 font-black tabular-nums transition-colors group-hover:bg-black group-hover:text-white">
+                                            {u.fifteenMinEfficiency.toFixed(1)}%
+                                        </div>
+                                    </td>
+                                    <td className="py-8 px-4 text-center">
+                                        <div className="inline-block border-2 border-black px-4 py-2 font-black tabular-nums transition-colors group-hover:bg-black group-hover:text-white">
+                                            {u.hourEfficiency.toFixed(1)}%
+                                        </div>
+                                    </td>
+                                    <td className="py-8 px-4 text-center">
+                                        {u.lastUpdate ? (
+                                            <div className="space-y-1">
+                                                <div className="flex items-center justify-center gap-2 text-xs font-black uppercase">
+                                                    <IconClock />
+                                                    {formatDistanceToNow(new Date(u.lastUpdate), { addSuffix: true }).toUpperCase()}
                                                 </div>
-                                                <div>
-                                                    <div className="font-bold text-slate-900 group-hover:text-blue-700 transition-colors">{u.name}</div>
-                                                    <div className="text-xs text-slate-400 font-semibold">{u.email}</div>
+                                                <div className="text-[9px] font-bold opacity-30 tracking-widest text-center">
+                                                    {format(new Date(u.lastUpdate), 'HH:MM:SS')}
                                                 </div>
                                             </div>
-                                        </TableCell>
-                                        <TableCell className="py-6">
-                                            {u.telegramUsername ? (
-                                                <Badge variant="outline" className="font-bold text-blue-600 bg-blue-50/50 border-blue-100 py-1.5 px-3 rounded-lg flex items-center gap-1.5 w-fit lowercase">
-                                                    <Hash className="w-3 h-3" />
-                                                    {u.telegramUsername}
-                                                </Badge>
-                                            ) : (
-                                                <Badge variant="outline" className="text-slate-400 bg-slate-50 border-slate-100 py-1.5 px-3 italic font-medium">Unlinked</Badge>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="py-6 text-center">
-                                            <Badge className={`font-black text-xs py-2 px-4 rounded-xl border ${getEfficiencyColor(u.fifteenMinEfficiency)} shadow-none`}>
-                                                {u.fifteenMinEfficiency.toFixed(1)}%
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="py-6 text-center">
-                                            <Badge className={`font-black text-xs py-2 px-4 rounded-xl border ${getEfficiencyColor(u.hourEfficiency)} shadow-none`}>
-                                                {u.hourEfficiency.toFixed(1)}%
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="py-6">
-                                            {u.lastUpdate ? (
-                                                <div className="space-y-1">
-                                                    <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-                                                        <Clock className="w-4 h-4 text-slate-400" />
-                                                        {formatDistanceToNow(new Date(u.lastUpdate), { addSuffix: true })}
-                                                    </div>
-                                                    <div className="text-[10px] text-slate-400 font-black uppercase tracking-widest pl-6">
-                                                        {format(new Date(u.lastUpdate), 'MMM d • HH:mm')}
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className="text-slate-300 font-bold uppercase text-[10px] tracking-widest italic pl-2">Incommunicado</div>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="py-6 px-8 text-right">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => router.push(`/admin/users/${u.id}`)}
-                                                className="text-white bg-slate-900 hover:bg-blue-600 rounded-xl px-5 font-bold text-xs h-10 shadow-sm active:scale-95 transition-all uppercase tracking-widest"
-                                            >
-                                                Audit Logs
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
-                </CardContent>
-            </Card>
+                                        ) : (
+                                            <span className="text-[10px] font-black opacity-20 uppercase tracking-[0.2em]">No Signal</span>
+                                        )}
+                                    </td>
+                                    <td className="py-8 px-8 text-right">
+                                        <button
+                                            onClick={() => router.push(`/admin/users/${u.id}`)}
+                                            className="border-2 border-black bg-white text-black font-black text-[10px] uppercase tracking-[0.2em] px-8 py-4 hover:bg-black hover:text-white transition-all active:scale-95 shadow-[4px_4px_0px_#000] hover:shadow-none translate-x-[-2px] translate-y-[-2px] hover:translate-x-0 hover:translate-y-0"
+                                        >
+                                            Audit Intel
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             {filteredEfficiency.length === 0 && (
-                <div className="text-center py-32 bg-white rounded-[40px] border-2 border-dashed border-slate-100 shadow-inner">
-                    <div className="bg-slate-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <AlertCircle className="w-10 h-10 text-slate-200" />
-                    </div>
-                    <h3 className="text-2xl font-black text-slate-900 mb-2">Target Not Found</h3>
-                    <p className="text-slate-400 font-semibold max-w-sm mx-auto">None of your operators match the current intelligence parameters.</p>
-                    <Button
-                        variant="link"
-                        onClick={() => setSearchTerm('')}
-                        className="text-blue-600 font-bold mt-4 uppercase tracking-widest text-xs"
-                    >
-                        Reset Local Search
-                    </Button>
+                <div className="text-center py-40 border-4 border-dashed border-black/10">
+                    <div className="text-8xl font-black text-black/5 opacity-50 mb-10 italic uppercase tracking-tighter">Void</div>
+                    <p className="text-black/40 font-black uppercase tracking-[0.2em] text-sm">Target acquisition failed. Zero matches in sector.</p>
                 </div>
             )}
+
+            {/* --- FOOTER DECORATION --- */}
+            <div className="border-t-2 border-black/5 pt-10 flex justify-between items-center opacity-20 text-[9px] font-black uppercase tracking-[0.5em]">
+                <span>VoiceOps Administrative Terminal v4.0.1</span>
+                <span>System Status: Optimal</span>
+            </div>
         </div>
     );
 }
