@@ -2,61 +2,101 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Mic, User, LogOut, Search, LayoutDashboard, ShieldCheck } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+
+// --- INLINE SVG COMPONENTS ---
+
+const IconMic = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" /><path d="M19 10v1a7 7 0 0 1-14 0v-1" /><line x1="12" y1="19" x2="12" y2="23" /><line x1="8" y1="23" x2="16" y2="23" /></svg>
+);
+
+const IconDashboard = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
+);
+
+const IconSearch = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+);
+
+const IconUser = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+);
+
+const IconShield = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+);
+
+const IconLogout = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+);
 
 const Navbar = () => {
     const { user, logout } = useAuth();
     const pathname = usePathname();
 
-    if (!user) return null;
+    // HIDE NAVBAR ON AUTH PAGES
+    const isAuthPage = pathname === '/login' || pathname === '/register' || pathname === '/';
+    if (!user || isAuthPage) return null;
 
     const navItems = [
-        { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-        { name: 'Search', href: '/search', icon: Search },
-        { name: 'Profile', href: '/profile', icon: User },
+        { name: 'DASHBOARD', href: '/dashboard', icon: IconDashboard },
+        { name: 'SEARCH', href: '/search', icon: IconSearch },
+        { name: 'PROFILE', href: '/profile', icon: IconUser },
     ];
 
     if (user.role === 'admin') {
-        navItems.push({ name: 'Admin', href: '/admin', icon: ShieldCheck });
+        navItems.push({ name: 'ADMIN', href: '/admin', icon: IconShield });
     }
 
     return (
-        <nav className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md">
-            <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                <Link href="/dashboard" className="flex items-center gap-2">
-                    <div className="bg-blue-600 p-1.5 rounded-lg">
-                        <Mic className="w-5 h-5 text-white" />
+        <nav className="sticky top-0 z-50 w-full bg-white border-b-4 border-black">
+            <div className="max-w-screen-2xl mx-auto px-6 h-20 flex items-center justify-between">
+
+                {/* BRAND */}
+                <Link href="/dashboard" className="flex items-center gap-3 active:scale-95 transition-transform">
+                    <div className="bg-black text-white p-2 flex items-center justify-center">
+                        <IconMic />
                     </div>
-                    <span className="font-bold text-xl tracking-tight">VoiceOps</span>
+                    <span className="font-black text-2xl tracking-tighter uppercase leading-none">VoiceOps</span>
                 </Link>
 
-                <div className="hidden md:flex items-center gap-6">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={cn(
-                                "text-sm font-medium transition-colors hover:text-blue-600 flex items-center gap-2",
-                                pathname === item.href ? "text-blue-600" : "text-slate-600"
-                            )}
-                        >
-                            <item.icon className="w-4 h-4" />
-                            {item.name}
-                        </Link>
-                    ))}
+                {/* LINKS */}
+                <div className="hidden lg:flex items-center gap-1">
+                    {navItems.map((item) => {
+                        const isActive = pathname === item.href;
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={cn(
+                                    "px-6 py-2 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 transition-all",
+                                    isActive
+                                        ? "bg-black text-white"
+                                        : "text-black/40 hover:text-black hover:bg-black/5"
+                                )}
+                            >
+                                <item.icon />
+                                {item.name}
+                            </Link>
+                        );
+                    })}
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <div className="hidden sm:flex flex-col items-end mr-2">
-                        <span className="text-sm font-medium">{user.name}</span>
-                        <span className="text-xs text-slate-500 capitalize">{user.role}</span>
+                {/* USER ACTIONS */}
+                <div className="flex items-center gap-6">
+                    <div className="hidden sm:flex flex-col items-end border-r-2 border-black/10 pr-6">
+                        <span className="text-xs font-black uppercase tracking-tight">{user.name}</span>
+                        <span className="text-[9px] font-bold text-black/30 uppercase tracking-widest leading-none">{user.role}</span>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={logout}>
-                        <LogOut className="w-5 h-5 text-slate-600" />
-                    </Button>
+
+                    <button
+                        onClick={logout}
+                        className="group flex items-center justify-center w-12 h-12 border-2 border-black hover:bg-black hover:text-white transition-all active:scale-90"
+                        title="TERMINATE SESSION"
+                    >
+                        <IconLogout />
+                    </button>
                 </div>
             </div>
         </nav>
