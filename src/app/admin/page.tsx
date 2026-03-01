@@ -87,12 +87,8 @@ export default function AdminDashboard() {
     };
 
     useEffect(() => {
-        if (user && user.role !== 'admin') {
-            router.push('/dashboard');
-            return;
-        }
         fetchData();
-    }, [user, router]);
+    }, []);
 
     const filteredEfficiency = efficiency.filter(item =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -106,8 +102,6 @@ export default function AdminDashboard() {
             <p className="text-black font-black tracking-widest uppercase text-xs">Initializing Secure Terminal...</p>
         </div>
     );
-
-    if (!user || user.role !== 'admin') return null;
 
     return (
         <div className="max-w-screen-2xl mx-auto px-6 py-12 space-y-16 bg-white text-black min-h-screen">

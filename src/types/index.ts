@@ -6,13 +6,16 @@ export interface IUser {
     telegramUserId?: string;
     telegramUsername?: string;
     role: 'operator' | 'admin';
+    isPresent: boolean;
+    lastUpdateAt?: string;
     createdAt: string;
 }
 
 export interface IUpdate {
     _id: string;
     userId: string;
-    mediaType: 'voice' | 'video';
+    mediaType: 'voice' | 'video' | 'text';
+    reportType: 'regular' | 'hourly' | 'report';
     transcript: string;
     summary: string;
     topic: string;

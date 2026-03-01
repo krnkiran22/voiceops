@@ -6,6 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import api from '@/lib/api';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 // --- INLINE SVG COMPONENTS ---
 
@@ -52,6 +53,8 @@ interface UserProfile {
     email: string;
     role: string;
     telegramUsername?: string;
+    isPresent: boolean;
+    lastUpdateAt?: string;
 }
 
 export default function UserDetailPage() {
@@ -138,6 +141,76 @@ export default function UserDetailPage() {
                 <div className="border-l-4 border-black pl-10 hidden md:block">
                     <div className="text-black/30 text-[10px] font-black uppercase tracking-widest mb-2">Total Intel Points</div>
                     <div className="text-6xl font-black tabular-nums tracking-tighter leading-none">{updates.length}</div>
+                </div>
+            </div>
+
+            {/* --- SOP ATTENDANCE GRID --- */}
+            <div className="border-4 border-black p-10 space-y-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b-2 border-black pb-6">
+                    <div>
+                        <h2 className="text-2xl font-black uppercase tracking-tighter italic">Operational SOP Timeline</h2>
+                        <p className="text-[10px] font-bold text-black/40 uppercase tracking-[0.2em] mt-1">15-Minute Tactical Signal Checks (08:45 - 18:00)</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <div className={`px-4 py-2 border-2 border-black text-xs font-black uppercase tracking-widest ${userProfile.isPresent ? 'bg-green-500 text-white' : 'bg-red-500 text-white animate-pulse'}`}>
+                            {userProfile.isPresent ? 'SIGNAL: PRESENT' : 'SIGNAL: MISSING'}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                    {(() => {
+                        const slots = [];
+                        let start = new Date();
+                        start.setHours(8, 45, 0, 0);
+                        const end = new Date();
+                        end.setHours(18, 0, 0, 0);
+
+                        while (start <= end) {
+                            const timeStr = format(start, 'HH:mm');
+                            const slotEnd = new Date(start.getTime() + 15 * 60000);
+
+                            // Check if an update exists in this slot
+                            const hasUpdate = updates.some(u => {
+                                const uDate = new Date(u.createdAt);
+                                return uDate >= start && uDate < slotEnd;
+                            });
+
+                            const isLunch = timeStr >= '13:00' && timeStr < '14:00';
+                            const isReportTime = timeStr === '18:00' || timeStr === '08:45' || timeStr === '13:00';
+
+                            slots.push(
+                                <div
+                                    key={timeStr}
+                                    className={cn(
+                                        "border-2 p-3 flex flex-col items-center justify-center gap-2 transition-all",
+                                        hasUpdate ? "bg-black text-white border-black" : "border-black/10 text-black/20",
+                                        isLunch && !hasUpdate && "bg-black/5 border-dashed",
+                                        isReportTime && !hasUpdate && "border-black/40 border-dashed"
+                                    )}
+                                >
+                                    <span className="text-[9px] font-black">{timeStr}</span>
+                                    {hasUpdate ? (
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                    ) : (
+                                        <div className="w-3 h-3 border border-current rounded-full opacity-20" />
+                                    )}
+                                    {isLunch && <span className="text-[7px] font-black opacity-40">LUNCH</span>}
+                                    {timeStr === '08:45' && <span className="text-[7px] font-black opacity-40">START</span>}
+                                    {timeStr === '18:00' && <span className="text-[7px] font-black opacity-40">REPORT</span>}
+                                </div>
+                            );
+                            start = slotEnd;
+                        }
+                        return slots;
+                    })()}
+                </div>
+
+                <div className="bg-black/5 p-4 flex flex-wrap gap-6 text-[8px] font-black uppercase tracking-widest text-black/40">
+                    <div className="flex items-center gap-2"><div className="w-2 h-2 bg-black"></div> COMPLETED SIGNAL</div>
+                    <div className="flex items-center gap-2"><div className="w-2 h-2 border border-black/20"></div> PENDING / MISSED</div>
+                    <div className="flex items-center gap-2"><div className="w-2 h-2 border border-black/40 border-dashed"></div> MILESTONE (REPORT/START)</div>
+                    <div className="flex items-center gap-2"><div className="w-2 h-2 bg-black/10 border-dashed border border-black/10"></div> LUNCH BREAK</div>
                 </div>
             </div>
 

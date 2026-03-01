@@ -1,0 +1,34 @@
+# VoiceOps: Project Intelligence Update
+
+## Project Overview
+This application functions as a **Terminal for Team Intelligence**, transcribing and organizing voice notes and video updates sent via Telegram. 
+
+It is designed to solve the "Cognitive Overload" of team communication by converting raw media into searchable, summarized text, allowing for instant understanding and long-term operator evaluation.
+
+---
+
+## Features Added (Completed Phase)
+
+- **Tactical Monochrome Overhaul**: Implemented a high-end "Brutalist" design across the Admin Dashboard and User Detail pages using a strict Black & White palette.
+- **Raw SVG Architecture**: Replaced all icon libraries with custom inline SVGs for maximum performance and a unique "state-of-the-art" visual identity.
+- **Operator Efficiency Tracking**: Automated 15-minute and 1-hour "Intel Signal" monitoring to track how consistently operators are providing updates.
+- **Intelligence Stream**: Created a unified feed for User Detail pages showing transcripts, AI-generated summaries, and topic extraction for every voice/video message.
+- **Public Admin Access**: Decoupled strict authentication from the /admin route to allow immediate overhead view of fleet operations.
+- **Secure Gateway Redesign**: Completely re-engineered the Login and Registration pages as "Security Gateways" to maintain the tactical aesthetic.
+
+---
+
+## Technical Integration
+
+- **Frontend**: Next.js 16 (Turbopack), Tailwind CSS, Framer Motion.
+- **Backend API**: Node.js/Express handling efficiency calculations and intel retrieval.
+- **Intelligence**: AI-powered transcription and summarization (currently high-performance Groq).
+
+---
+
+## Roadmap & Next Operational Steps
+
+- **Programmed Sorting**: Automate the sorting of transcripts into specific Google Drive folders based on identifiers like `##` (High Priority) or `@@` (Project Code).
+- **Ollama Migration**: Move the LLM engine from Groq to **Ollama** to achieve a fully open-source, locally hosted intelligence pipeline (100% Privacy/Self-Hosted).
+- **Bot Consolidation**: Merge the separate "Payment Bot" and "Updates Bot" into a single, unified "Command Bot" for streamlined management.
+- **Evaluation Engine**: Enhance the "Audit Intel" feature to include sentiment analysis and automated tactical scores for operators.

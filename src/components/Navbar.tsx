@@ -27,6 +27,10 @@ const IconShield = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
 );
 
+const IconClock = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+);
+
 const IconLogout = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
 );
@@ -37,17 +41,18 @@ const Navbar = () => {
 
     // HIDE NAVBAR ON AUTH PAGES
     const isAuthPage = pathname === '/login' || pathname === '/register' || pathname === '/';
-    if (!user || isAuthPage) return null;
+    const isAdminPage = pathname === '/admin' || pathname.startsWith('/admin/');
+
+    if (isAuthPage) return null;
+    if (!user && !isAdminPage) return null;
 
     const navItems = [
         { name: 'DASHBOARD', href: '/dashboard', icon: IconDashboard },
-        { name: 'SEARCH', href: '/search', icon: IconSearch },
+        { name: 'SEARCH', href: '/search', icon: IconSearch, adminOnly: true },
+        { name: 'ATTENDANCE', href: '/attendance', icon: IconClock, operatorOnly: true },
         { name: 'PROFILE', href: '/profile', icon: IconUser },
+        { name: 'ADMIN', href: '/admin', icon: IconShield, adminOnly: true },
     ];
-
-    if (user.role === 'admin') {
-        navItems.push({ name: 'ADMIN', href: '/admin', icon: IconShield });
-    }
 
     return (
         <nav className="sticky top-0 z-50 w-full bg-white border-b-4 border-black">
@@ -65,6 +70,14 @@ const Navbar = () => {
                 <div className="hidden lg:flex items-center gap-1">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href;
+
+                        // Role-based filtering
+                        if (item.adminOnly && user?.role !== 'admin') return null;
+                        if (item.operatorOnly && user?.role !== 'operator') return null;
+
+                        // Don't show Dashboard/Profile if not logged in (fallback)
+                        if (!user && (item.name === 'DASHBOARD' || item.name === 'PROFILE')) return null;
+
                         return (
                             <Link
                                 key={item.href}
@@ -85,18 +98,29 @@ const Navbar = () => {
 
                 {/* USER ACTIONS */}
                 <div className="flex items-center gap-6">
-                    <div className="hidden sm:flex flex-col items-end border-r-2 border-black/10 pr-6">
-                        <span className="text-xs font-black uppercase tracking-tight">{user.name}</span>
-                        <span className="text-[9px] font-bold text-black/30 uppercase tracking-widest leading-none">{user.role}</span>
-                    </div>
+                    {user ? (
+                        <>
+                            <div className="hidden sm:flex flex-col items-end border-r-2 border-black/10 pr-6">
+                                <span className="text-xs font-black uppercase tracking-tight">{user.name}</span>
+                                <span className="text-[9px] font-bold text-black/30 uppercase tracking-widest leading-none">{user.role}</span>
+                            </div>
 
-                    <button
-                        onClick={logout}
-                        className="group flex items-center justify-center w-12 h-12 border-2 border-black hover:bg-black hover:text-white transition-all active:scale-90"
-                        title="TERMINATE SESSION"
-                    >
-                        <IconLogout />
-                    </button>
+                            <button
+                                onClick={logout}
+                                className="group flex items-center justify-center w-12 h-12 border-2 border-black hover:bg-black hover:text-white transition-all active:scale-90"
+                                title="TERMINATE SESSION"
+                            >
+                                <IconLogout />
+                            </button>
+                        </>
+                    ) : (
+                        <Link
+                            href="/login"
+                            className="border-2 border-black px-6 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all"
+                        >
+                            Log In
+                        </Link>
+                    )}
                 </div>
             </div>
         </nav>
