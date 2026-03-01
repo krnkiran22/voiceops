@@ -162,11 +162,11 @@ const Navbar = () => {
             {/* MOBILE MENU OVERLAY */}
             <div
                 className={cn(
-                    "fixed inset-0 z-40 bg-white pt-24 px-6 lg:hidden transition-transform duration-300 ease-in-out border-b-8 border-black",
+                    "fixed inset-0 z-40 bg-white pt-24 px-4 lg:hidden transition-transform duration-300 ease-in-out border-b-8 border-black overflow-y-auto overflow-x-hidden",
                     mobileMenuOpen ? "translate-y-0" : "-translate-y-full"
                 )}
             >
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 pb-12">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href;
 
@@ -180,7 +180,7 @@ const Navbar = () => {
                                 key={item.href}
                                 href={item.href}
                                 className={cn(
-                                    "p-6 text-xl font-black uppercase tracking-widest flex items-center gap-6 border-4 border-black transition-all active:translate-x-1 active:translate-y-1 active:shadow-none",
+                                    "p-6 text-lg font-black uppercase tracking-widest flex items-center gap-6 border-4 border-black transition-all active:translate-x-1 active:translate-y-1 active:shadow-none mr-2",
                                     isActive
                                         ? "bg-black text-white shadow-none"
                                         : "bg-white text-black shadow-[6px_6px_0px_rgba(0,0,0,1)]"
@@ -197,7 +197,7 @@ const Navbar = () => {
                     {user && (
                         <button
                             onClick={logout}
-                            className="mt-4 p-6 text-xl font-black uppercase tracking-widest flex items-center justify-between border-4 border-black bg-red-500 text-white shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none"
+                            className="mt-4 p-6 text-lg font-black uppercase tracking-widest flex items-center justify-between border-4 border-black bg-red-500 text-white shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none mr-2"
                         >
                             <span>Logout Session</span>
                             <IconLogout />
