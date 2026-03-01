@@ -94,7 +94,7 @@ export default function DashboardPage() {
         <div className="max-w-screen-2xl mx-auto px-6 py-12 space-y-12">
             <div className="flex flex-col md:flex-row gap-8 items-start justify-between border-b-8 border-black pb-8">
                 <div className="flex-1">
-                    <h1 className="text-6xl font-black tracking-tighter uppercase italic leading-none mb-2">Tactical Intelligence</h1>
+                    <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic leading-none mb-2">Tactical Intelligence</h1>
                     <p className="text-xs font-bold uppercase tracking-[0.4em] opacity-30">On-Ground Operational Feed // Real-Time Signal</p>
                 </div>
 
